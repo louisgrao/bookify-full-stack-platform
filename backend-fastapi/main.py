@@ -1,7 +1,25 @@
-from fastapi import FastAPI
+from datetime import datetime
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from sqlmodel import Field, Session, SQLModel, create_engine, select
+
+
+class Books(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    title: str
+    author: str
+    user_id: int       
+    added: str   
+      
+DATABASE_URL = "postgresql://louis@localhost:5432/bookify"
+engine = create_engine(DATABASE_URL)
 
 app = FastAPI()
+
+
+def get_session():
+    with Session(engine) as session:
+        yield session
 
 app.add_middleware(
     CORSMiddleware,
@@ -11,13 +29,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-books = [
-    #id  title  author  user_id timestamp
-    [1, "The Hobbit", "J.R.R Tolkein", 1, "2025-11-11 13:23:44"],
-    [2, "The Colour of Magic", "Terry Pratchet", 1, "2025-11-09 15:45:21"],
-    [3, "Cloud Cuckoo Land", "Anthony Doerr", 1, "2025-11-11 11:12:01"]
-    ]
-
 @app.get("/")
-async def root():
+async def root(session: Session = Depends(get_session)):
+    statement = select(Books)
+    books = session.exec(statement).all()
+    if not books:
+        raise HTTPException(status_code=404, detail="Book not found")
+        
     return books
+

@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
-  // State to hold the array of book arrays
   const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -10,7 +9,6 @@ function App() {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        // Replace with your actual FastAPI server URL and endpoint
         const response = await fetch("http://127.0.0.1:8000/");
 
         if (!response.ok) {
@@ -27,7 +25,7 @@ function App() {
     };
 
     fetchBooks();
-  }, []); // Empty dependency array means this runs once on mount
+  }, []);
 
   if (isLoading) return <div>Loading books...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -56,8 +54,7 @@ function App() {
         </thead>
         <tbody>
           {books.map((book) => {
-            // Destructuring the inner array based on your exact data structure
-            const [id, title, author, userId, timeStamp] = book;
+            const { id, title, author, user_id, added } = book;
 
             return (
               <tr className="bg-neutral-primary">
@@ -69,8 +66,8 @@ function App() {
                 </th>
                 <td className="px-6 py-4">{title}</td>
                 <td className="px-6 py-4">{author}</td>
-                <td className="px-6 py-4">{userId}</td>
-                <td className="px-6 py-4">{timeStamp}</td>
+                <td className="px-6 py-4">{user_id}</td>
+                <td className="px-6 py-4">{added}</td>
               </tr>
             );
           })}
